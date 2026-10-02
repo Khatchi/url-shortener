@@ -1,0 +1,32 @@
+[project]
+name = "url-shortener"
+version = "0.1.0"
+description = "A production-minded URL shortener API built with FastAPI and PostgreSQL"
+readme = "README.md"
+authors = [
+    { name = "Khatchi", email = "solomon9ice2014@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.20.0",
+    "asyncpg>=0.31.0",
+    "fastapi>=0.142.2",
+    "pydantic-settings>=2.15.0",
+    "sqlalchemy>=2.1.2",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""
+module-name = "app"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+]

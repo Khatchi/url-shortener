@@ -1,6 +1,8 @@
 import pytest
 from pydantic import ValidationError
+
 from app.core.config import Settings
+
 
 # tests load from env
 def test_settings_load_from_environment(monkeypatch):
@@ -19,12 +21,14 @@ def test_settings_load_from_environment(monkeypatch):
     )
     assert settings.base_url == "http://localhost:8000"
 
-# checks db url required 
+
+# checks db url required
 def test_database_url_is_required(monkeypatch):
     monkeypatch.delenv("DATABASE_URL", raising=False)
 
     with pytest.raises(ValidationError):
         Settings()
+
 
 # tests defaults or db url fallbacks
 def test_base_url_defaults_to_localhost(monkeypatch):

@@ -27,7 +27,7 @@ def test_database_url_is_required(monkeypatch):
     monkeypatch.delenv("DATABASE_URL", raising=False)
 
     with pytest.raises(ValidationError):
-        Settings()
+        Settings(_env_file=None)
 
 
 # tests defaults or db url fallbacks

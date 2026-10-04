@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock, Mock
 from sqlalchemy.exc import IntegrityError
 
 import pytest
+import uuid
 
 from app.models.url import URL
 from app.services.url import URLService
@@ -101,3 +102,22 @@ async def test_create_url_fails_after_max_retries(monkeypatch):
         await service.create_url("https://exiample.com")
 
     assert repository.create.await_count == 3
+
+@pytest.mark.asyncio
+async def test_get_url_returns_url():
+    repository = Mock()
+
+    url = URL(
+        id=uuid.uuid4(),
+        original_url="https://example.com/path",
+        short_code="aB3xY9",
+    )
+
+    repository.get_by_short_code = AsyncMock(return_value=url)
+
+    service = URLService(repository)
+
+    result = await service.get_url("aB3xY9")
+
+    assert result is url
+    repository.get_by_short_code.assert_awaited_once_with("aB3xY9")

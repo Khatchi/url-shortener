@@ -27,4 +27,8 @@ class URLService:
 
         raise RuntimeError("Failed to generate a unique short code")
 
+    
+    async def get_url(self, short_code: str) -> URL | None:
+        return await self._repository.get_by_short_code(short_code)
 
+        

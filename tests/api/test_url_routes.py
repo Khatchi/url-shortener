@@ -4,14 +4,21 @@ from uuid import uuid4
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.api.v1.urls import get_url_service, router, get_settings
+from app.api.v1.urls import (
+    get_url_service,
+    router,
+    get_settings,
+    redirect_router,
+)
 from app.models.url import URL
 from app.core.config import Settings
 
 
 def create_test_app(service: Mock) -> FastAPI:
     app = FastAPI()
+
     app.include_router(router, prefix="/api/v1")
+    app.include_router(redirect_router)
 
     settings = Settings(
         database_url="postgresql+asyncpg://test",
@@ -54,3 +61,47 @@ def test_create_url_returns_created_url():
     service.create_url.assert_awaited_once_with(
         "https://example.com/path",
     )
+
+
+# tests GET get_url
+def test_redirects_to_original_url():
+    service = Mock()
+
+    url = URL(
+        id=uuid4(),
+        original_url="https://example.com/path",
+        short_code="aB3xY9",
+    )
+
+    service.get_url = AsyncMock(return_value=url)
+
+    app = create_test_app(service)
+    client = TestClient(app)
+
+    response = client.get(
+        "/aB3xY9",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 307
+    assert response.headers["location"] == "https://example.com/path"
+
+    service.get_url.assert_awaited_once_with("aB3xY9")
+
+
+def test_redirect_returns_404_when_short_code_not_found():
+    service = Mock()
+
+    service.get_url = AsyncMock(return_value=None)
+
+    app = create_test_app(service)
+    client = TestClient(app)
+
+    response = client.get(
+        "/missing",
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 404
+
+    service.get_url.assert_awaited_once_with("missing")

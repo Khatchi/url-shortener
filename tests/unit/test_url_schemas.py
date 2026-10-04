@@ -3,6 +3,7 @@ from pydantic import ValidationError
 
 from app.schemas.url import CreateURLRequest, CreateURLResponse
 
+
 def test_create_url_request_accepts_http_url():
     request = CreateURLRequest(original_url="http://example.com")
 

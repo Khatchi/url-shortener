@@ -2,6 +2,7 @@ import string
 
 from app.core.short_code import generate_short_code
 
+
 def test_generate_short_code_has_expected_length():
     short_code = generate_short_code()
 

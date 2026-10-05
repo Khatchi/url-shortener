@@ -36,3 +36,6 @@ dev = [
 markers = [
     "integration: tests that exercise real application and database integrations",
 ]
+
+[tool.ruff.lint]
+ignore = ["B008"]

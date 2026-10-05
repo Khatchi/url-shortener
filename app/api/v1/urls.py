@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 
-from app.core import short_code
+from app.api.dependencies import get_url_service
 from app.core.config import Settings
 from app.schemas.url import CreateURLRequest, CreateURLResponse
 from app.services.url import URLService
-from app.api.dependencies import get_url_service
 
 router = APIRouter()
 redirect_router = APIRouter()

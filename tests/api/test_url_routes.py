@@ -5,13 +5,13 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.api.v1.urls import (
-    get_url_service,
-    router,
     get_settings,
+    get_url_service,
     redirect_router,
+    router,
 )
-from app.models.url import URL
 from app.core.config import Settings
+from app.models.url import URL
 
 
 def create_test_app(service: Mock) -> FastAPI:

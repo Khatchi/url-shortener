@@ -1,8 +1,8 @@
+import uuid
 from unittest.mock import AsyncMock, Mock
-from sqlalchemy.exc import IntegrityError
 
 import pytest
-import uuid
+from sqlalchemy.exc import IntegrityError
 
 from app.models.url import URL
 from app.services.url import URLService

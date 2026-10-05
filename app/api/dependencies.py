@@ -1,10 +1,8 @@
 from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.core.config import Settings
 from app.repositories.url import URLRepository
 from app.services.url import URLService
-from tests.conftest import session_factory
 
 
 def get_url_service(request: Request) -> URLService:

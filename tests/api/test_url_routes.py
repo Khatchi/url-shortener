@@ -105,3 +105,34 @@ def test_redirect_returns_404_when_short_code_not_found():
     assert response.status_code == 404
 
     service.get_url.assert_awaited_once_with("missing")
+
+
+# Test url creation - Validations
+def test_create_url_rejects_invalid_url():
+    service = Mock()
+
+    app = create_test_app(service)
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/v1/urls",
+        json={"original_url": "not-a-url"},
+    )
+
+    assert response.status_code == 422
+    service.create_url.assert_not_called()
+
+
+def test_create_url_rejects_missing_url():
+    service = Mock()
+
+    app = create_test_app(service)
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/v1/urls",
+        json={},
+    )
+
+    assert response.status_code == 422
+    service.create_url.assert_not_called()

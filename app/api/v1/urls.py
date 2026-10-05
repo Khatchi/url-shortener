@@ -5,13 +5,10 @@ from app.core import short_code
 from app.core.config import Settings
 from app.schemas.url import CreateURLRequest, CreateURLResponse
 from app.services.url import URLService
+from app.api.dependencies import get_url_service
 
 router = APIRouter()
 redirect_router = APIRouter()
-
-
-def get_url_service() -> URLService:
-    raise NotImplementedError
 
 
 def get_settings() -> Settings:

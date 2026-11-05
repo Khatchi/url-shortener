@@ -43,7 +43,6 @@ def test_base_url_defaults_to_localhost(monkeypatch):
     assert settings.base_url == "http://localhost:8000"
 
 
-
 def test_test_database_url_is_loaded(monkeypatch):
     monkeypatch.setenv(
         "DATABASE_URL",
@@ -60,4 +59,3 @@ def test_test_database_url_is_loaded(monkeypatch):
         settings.test_database_url
         == "postgresql+asyncpg://kachim:kachim@localhost:5433/url_shortener_test"
     )
-

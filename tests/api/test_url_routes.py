@@ -1,3 +1,4 @@
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
@@ -59,7 +60,8 @@ def test_create_url_returns_created_url():
     }
 
     service.create_url.assert_awaited_once_with(
-        "https://example.com/path",
+        original_url="https://example.com/path",
+        expires_at=None,
     )
 
 
@@ -136,3 +138,58 @@ def test_create_url_rejects_missing_url():
 
     assert response.status_code == 422
     service.create_url.assert_not_called()
+
+
+# API Test for expiration
+def test_create_url_accepts_expiration_date():
+    service = Mock()
+
+    expires_at = datetime.now(UTC) + timedelta(days=7)
+
+    created_url = URL(
+        id=uuid4(),
+        original_url="https://example.com/path",
+        short_code="aB3xY9",
+        expires_at=expires_at,
+    )
+
+    service.create_url = AsyncMock(return_value=created_url)
+
+    app = create_test_app(service)
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/v1/urls",
+        json={
+            "original_url": "https://example.com/path",
+            "expires_at": expires_at.isoformat(),
+        },
+    )
+
+    assert response.status_code == 201
+
+    service.create_url.assert_awaited_once_with(
+        original_url="https://example.com/path",
+        expires_at=expires_at,
+    )
+
+
+def test_create_url_returns_422_when_expiration_is_in_the_past():
+    service = Mock()
+
+    service.create_url = AsyncMock(
+        side_effect=ValueError("Expiration date must be in the future")
+    )
+
+    app = create_test_app(service)
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/v1/urls",
+        json={
+            "original_url": "https://example.com/path",
+            "expires_at": "2025-01-01T00:00:00+00:00",
+        },
+    )
+
+    assert response.status_code == 422

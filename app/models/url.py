@@ -10,7 +10,7 @@ from app.db.base import Base
 class URL(Base):
     __tablename__ = "urls"
 
-    id : Mapped[uuid.UUID] = mapped_column(
+    id: Mapped[uuid.UUID] = mapped_column(
         Uuid,
         primary_key=True,
         default=uuid.uuid4,
@@ -33,4 +33,7 @@ class URL(Base):
         server_default=func.now(),
     )
 
-
+    expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )

@@ -14,14 +14,22 @@ def get_settings() -> Settings:
     return Settings()
 
 
-@router.post("/urls",response_model=CreateURLResponse, status_code=201)
+@router.post("/urls", response_model=CreateURLResponse, status_code=201)
 async def create_url(
-    request: CreateURLRequest, 
+    request: CreateURLRequest,
     service: URLService = Depends(get_url_service),
     settings: Settings = Depends(get_settings),
-    ) -> CreateURLResponse:
+) -> CreateURLResponse:
 
-    url = await service.create_url(str(request.original_url))
+    try:
+        url = await service.create_url(
+            original_url=str(request.original_url), expires_at=request.expires_at
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=422,
+            detail=str(exc),
+        ) from exc
 
     return CreateURLResponse(
         original_url=url.original_url,
@@ -32,9 +40,9 @@ async def create_url(
 
 @redirect_router.get("/{short_code}")
 async def redirect_to_url(
-    short_code: str, 
+    short_code: str,
     service: URLService = Depends(get_url_service),
-    ) -> RedirectResponse:
+) -> RedirectResponse:
 
     url = await service.get_url(short_code)
     if url is None:
@@ -44,9 +52,3 @@ async def redirect_to_url(
         url=url.original_url,
         status_code=307,
     )
-
-
-
-
-
-

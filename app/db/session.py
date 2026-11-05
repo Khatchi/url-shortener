@@ -22,8 +22,3 @@ def create_session_factory(engine: AsyncEngine) -> async_sessionmaker[AsyncSessi
         class_=AsyncSession,
         expire_on_commit=False,
     )
-
-
-
-
-

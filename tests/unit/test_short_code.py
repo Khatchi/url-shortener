@@ -21,5 +21,3 @@ def test_generate_short_code_generates_different_values():
     second = generate_short_code()
 
     assert first != second
-
-

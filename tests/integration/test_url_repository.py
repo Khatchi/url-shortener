@@ -1,4 +1,5 @@
 import uuid
+from datetime import UTC, datetime
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -8,7 +9,9 @@ from app.repositories.url import URLRepository
 
 
 @pytest.mark.asyncio
-async def test_create_url_persists_url(session_factory: async_sessionmaker[AsyncSession]):
+async def test_create_url_persists_url(
+    session_factory: async_sessionmaker[AsyncSession],
+):
     repository = URLRepository(session_factory)
 
     url = URL(
@@ -26,7 +29,9 @@ async def test_create_url_persists_url(session_factory: async_sessionmaker[Async
 
 
 @pytest.mark.asyncio
-async def test_get_by_short_code_returns_url(session_factory: async_sessionmaker[AsyncSession]):
+async def test_get_by_short_code_returns_url(
+    session_factory: async_sessionmaker[AsyncSession],
+):
     repository = URLRepository(session_factory)
 
     url = URL(
@@ -46,7 +51,8 @@ async def test_get_by_short_code_returns_url(session_factory: async_sessionmaker
 
 @pytest.mark.asyncio
 async def test_get_by_short_code_returns_none_when_not_found(
-        session_factory: async_sessionmaker[AsyncSession]):
+    session_factory: async_sessionmaker[AsyncSession],
+):
 
     repository = URLRepository(session_factory)
 
@@ -54,3 +60,45 @@ async def test_get_by_short_code_returns_none_when_not_found(
 
     assert found is None
 
+
+@pytest.mark.asyncio
+async def test_create_url_persists_expiration(
+    session_factory: async_sessionmaker[AsyncSession],
+):
+
+    repository = URLRepository(session_factory)
+    expires_at = datetime(2027, 1, 1, tzinfo=UTC)
+
+    url = URL(
+        id=uuid.uuid4(),
+        original_url="https://example.com",
+        short_code="eXp123",
+        expires_at=expires_at,
+    )
+
+    created = await repository.create(url)
+
+    assert created.expires_at == expires_at
+
+
+@pytest.mark.asyncio
+async def test_get_by_short_code_returns_expiration(
+    session_factory: async_sessionmaker[AsyncSession],
+):
+
+    repository = URLRepository(session_factory)
+    expires_at = datetime(2027, 1, 1, tzinfo=UTC)
+
+    url = URL(
+        id=uuid.uuid4(),
+        original_url="https://example.com/path",
+        short_code="eXp456",
+        expires_at=expires_at,
+    )
+
+    await repository.create(url)
+
+    found = await repository.get_by_short_code("eXp456")
+
+    assert found is not None
+    assert found.expires_at == expires_at

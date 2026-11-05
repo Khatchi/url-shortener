@@ -1,3 +1,5 @@
+from datetime import UTC, datetime, timedelta
+
 import pytest
 from pydantic import ValidationError
 
@@ -41,3 +43,30 @@ def test_create_url_response_contains_expected_fields():
     assert str(response.original_url) == "https://example.com/path"
     assert response.short_code == "aB3xY9"
     assert response.short_url == "http://localhost:8000/aB3xY9"
+
+
+def test_create_url_request_defaults_expires_at_to_none():
+    request = CreateURLRequest(original_url="https://example.com")
+
+    assert request.expires_at is None
+
+
+def test_create_url_request_accepts_timezone_aware_expiration():
+    expires_at = datetime.now(UTC) + timedelta(days=7)
+
+    request = CreateURLRequest(
+        original_url="https://example.com",
+        expires_at=expires_at,
+    )
+
+    assert request.expires_at == expires_at
+
+
+def test_create_url_request_rejects_timezone_naive_expiration():
+    expires_at = datetime(2027, 1, 1)  # noqa: DTZ001
+
+    with pytest.raises(ValidationError):
+        CreateURLRequest(
+            original_url="https://example.com",
+            expires_at=expires_at,
+        )

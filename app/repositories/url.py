@@ -8,7 +8,6 @@ class URLRepository:
     def __init__(self, session_factory: async_sessionmaker[AsyncSession]):
         self._session_factory = session_factory
 
-
     async def create(self, url: URL) -> URL:
         async with self._session_factory() as session:
             session.add(url)
@@ -16,7 +15,6 @@ class URLRepository:
             await session.refresh(url)
             return url
 
-    
     async def get_by_short_code(self, short_code: str) -> URL | None:
         async with self._session_factory() as session:
             result = await session.execute(
@@ -24,4 +22,3 @@ class URLRepository:
             )
 
             return result.scalar_one_or_none()
-

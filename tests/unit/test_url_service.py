@@ -1,4 +1,5 @@
 import uuid
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -75,7 +76,6 @@ async def test_create_url_retries_when_short_code_collides(monkeypatch):
     assert second_attempt.short_code == "xyz789"
 
 
-
 @pytest.mark.asyncio
 async def test_create_url_fails_after_max_retries(monkeypatch):
     repository = Mock()
@@ -103,6 +103,7 @@ async def test_create_url_fails_after_max_retries(monkeypatch):
 
     assert repository.create.await_count == 3
 
+
 @pytest.mark.asyncio
 async def test_get_url_returns_url():
     repository = Mock()
@@ -121,3 +122,77 @@ async def test_get_url_returns_url():
 
     assert result is url
     repository.get_by_short_code.assert_awaited_once_with("aB3xY9")
+
+
+@pytest.mark.asyncio
+async def test_get_url_returns_url_when_not_expired():
+    repository = Mock()
+
+    url = URL(
+        original_url="https://example.com/path",
+        short_code="aB3xY9",
+        expires_at=datetime(2027, 1, 1, tzinfo=UTC),
+    )
+
+    repository.get_by_short_code = AsyncMock(return_value=url)
+
+    service = URLService(repository)
+
+    result = await service.get_url("aB3xY9")
+
+    assert result is url
+
+
+@pytest.mark.asyncio
+async def test_get_url_returns_none_when_expired():
+    repository = Mock()
+
+    url = URL(
+        original_url="https://example.com/path",
+        short_code="aB3xY9",
+        expires_at=datetime(2025, 1, 1, tzinfo=UTC),
+    )
+
+    repository.get_by_short_code = AsyncMock(return_value=url)
+
+    service = URLService(repository)
+
+    result = await service.get_url("aB3xY9")
+
+    assert result is None
+
+
+@pytest.mark.asyncio
+async def test_create_url_persists_expiration():
+    repository = Mock()
+    repository.create = AsyncMock(side_effect=lambda url: url)
+
+    expires_at = datetime(2027, 1, 1, tzinfo=UTC)
+
+    service = URLService(repository)
+
+    result = await service.create_url(
+        "https://example.com/path",
+        expires_at=expires_at,
+    )
+
+    assert result.expires_at == expires_at
+    repository.create.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_create_url_rejects_past_expiration():
+    repository = Mock()
+    repository.create = AsyncMock()
+
+    expires_at = datetime(2025, 1, 1, tzinfo=UTC)
+
+    service = URLService(repository)
+
+    with pytest.raises(ValueError, match="Expiration date must be in the future"):
+        await service.create_url(
+            "https://example.com/path",
+            expires_at=expires_at,
+        )
+
+    repository.create.assert_not_awaited()

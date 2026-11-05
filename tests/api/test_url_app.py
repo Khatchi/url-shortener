@@ -40,15 +40,12 @@ async def test_create_url_with_real_application():
 
         assert data["original_url"] == "https://example.com/path"
         assert len(data["short_code"]) == 6
-        assert data["short_url"] == (
-            f"http://localhost:8000/{data['short_code']}"
-        )
+        assert data["short_url"] == (f"http://localhost:8000/{data['short_code']}")
     finally:
         async with engine.begin() as connection:
             await connection.run_sync(Base.metadata.drop_all)
 
         await engine.dispose()
-
 
 
 @pytest.mark.integration
@@ -88,9 +85,7 @@ async def test_redirect_with_real_application():
             )
 
         assert redirect_response.status_code == 307
-        assert redirect_response.headers["location"] == (
-            "https://example.com/path"
-        )
+        assert redirect_response.headers["location"] == ("https://example.com/path")
     finally:
         async with engine.begin() as connection:
             await connection.run_sync(Base.metadata.drop_all)

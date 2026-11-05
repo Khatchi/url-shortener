@@ -25,5 +25,3 @@ def test_create_session_factory_uses_engine():
     assert isinstance(session_factory, async_sessionmaker)
     assert session_factory.kw["bind"] is engine
     assert session_factory.kw["expire_on_commit"] is False
-
-

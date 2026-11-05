@@ -7,14 +7,16 @@ from app.models.url import URL
 
 def test_url_model_has_expected_columns():
     mapper = inspect(URL)
-    columns = { column.key for column in mapper.columns }
+    columns = {column.key for column in mapper.columns}
 
     assert columns == {
         "id",
         "original_url",
         "short_code",
         "created_at",
+        "expires_at",
     }
+
 
 def test_url_model_uses_uuid_primary_key():
     mapper = inspect(URL)
@@ -44,3 +46,9 @@ def test_url_model_short_code_has_length_six():
     mapper = inspect(URL)
 
     assert mapper.columns.short_code.type.length == 6
+
+
+def test_url_model_expires_at_is_nullable():
+    mapper = inspect(URL)
+
+    assert mapper.columns.expires_at.nullable is True

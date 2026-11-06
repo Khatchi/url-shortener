@@ -38,6 +38,9 @@ class URLService:
     async def get_url(self, short_code: str) -> URL | None:
         url = await self._repository.get_by_short_code(short_code)
 
+        if url is None:
+            return None
+
         if url.expires_at is not None and url.expires_at <= datetime.now(UTC):
             return None
 
